@@ -1,4 +1,4 @@
-package life1d
+package naive1d
 
 import (
 	"math"

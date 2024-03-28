@@ -7,8 +7,8 @@ import (
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/makyo/gogol/base"
-	"github.com/makyo/gogol/life1d"
-	"github.com/makyo/gogol/life2d"
+	"github.com/makyo/gogol/naive1d"
+	"github.com/makyo/gogol/naive2d"
 )
 
 type tickMsg time.Time
@@ -19,7 +19,7 @@ type model struct {
 
 var (
 	wrapFlag = flag.Bool("wrap", false, "Wrap the grid at the edges, treating it like a toroid")
-	algoFlag = flag.String("algo", "life1d", "Which algorithm to use (life1d, life2d)")
+	algoFlag = flag.String("algo", "naive1d", "Which algorithm to use (life1d, life2d)")
 	width    = 0
 	height   = 0
 )
@@ -27,10 +27,10 @@ var (
 func getModel(width, height int, wrap bool) model {
 	m := model{}
 	switch *algoFlag {
-	case "life1d":
-		m.base = life1d.New(width, height, wrap)
-	case "life2d":
-		m.base = life2d.New(width, height, wrap)
+	case "naive1d":
+		m.base = naive1d.New(width, height, wrap)
+	case "naive2d":
+		m.base = naive2d.New(width, height, wrap)
 	}
 	return m
 }

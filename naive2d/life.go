@@ -1,4 +1,4 @@
-package life2d
+package naive2d
 
 import (
 	"math"
