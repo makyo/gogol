@@ -70,7 +70,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	case tea.MouseMsg:
 		if msg.Type == tea.MouseLeft {
-			m.base = m.base.ToggleCell(msg.X, msg.Y)
+			m.base.ToggleCell(msg.X, msg.Y)
 		}
 		return m, nil
 
@@ -81,13 +81,13 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		width = msg.Width
 		height = msg.Height
 		m = getModel(width, height, *wrapFlag)
-		m.base = m.base.Populate()
+		m.base.Populate()
 
 	// Tick messages
 	case tickMsg:
 
 		// Evolve the next generation
-		m.base = m.base.Next()
+		m.base.Next()
 		return m, tick()
 	}
 	return m, nil

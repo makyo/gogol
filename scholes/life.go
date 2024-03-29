@@ -2,8 +2,6 @@ package scholes
 
 import (
 	"math/rand"
-
-	"github.com/makyo/gogol/base"
 )
 
 type model struct {
@@ -95,17 +93,16 @@ func sumField(field []int, width int) []int {
 }
 
 // Next evolves the field one generation.
-func (m model) Next() base.Model {
+func (m model) Next() {
 	sum := sumField(m.field, m.width)
 	threes := where(sum, 3)
 	fours := where(sum, 4)
 	for i, cell := range m.field {
 		m.field[i] = threes[i] | fours[i]&cell
 	}
-	return m
 }
 
-func (m model) Ingest(field [][]int) base.Model {
+func (m model) Ingest(field [][]int) {
 	m.width = len(field[0])
 	m.field = make([]int, m.width*len(field))
 	for row, _ := range field {
@@ -113,28 +110,25 @@ func (m model) Ingest(field [][]int) base.Model {
 			m.field[row*col] = field[row][col]
 		}
 	}
-	return m
 }
 
 // Populate generates a random field of automata, where each cell has a 1 in 5 chance of being alive.
-func (m model) Populate() base.Model {
+func (m model) Populate() {
 	for i, _ := range m.field {
 		if rand.Intn(5) == 0 {
 			m.field[i] = 1
 		}
 	}
-	return m
 }
 
 // ToggleCell toggles whether the given cell is alive or dead.
-func (m model) ToggleCell(x, y int) base.Model {
+func (m model) ToggleCell(x, y int) {
 	pos := y*m.width + x
 	if m.field[pos] == 1 {
 		m.field[pos] = 0
 	} else {
 		m.field[pos] = 1
 	}
-	return m
 }
 
 // View builds the entire screen's worth of cells to be printed by returning a • for a living cell or a space for a dead cell.

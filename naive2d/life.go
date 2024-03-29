@@ -3,8 +3,6 @@ package naive2d
 import (
 	"math"
 	"math/rand"
-
-	"github.com/makyo/gogol/base"
 )
 
 type model struct {
@@ -19,7 +17,7 @@ func (m model) wrapPos(pos int) int {
 }
 
 // nextGeneration evolves the field of automata one generation based on the rules of Conway's Game of Life.
-func (m model) Next() base.Model {
+func (m model) Next() {
 	// Create a new field based on the existing one.
 	next := make([][]int, len(m.field))
 	for i := 0; i < len(m.field); i++ {
@@ -84,12 +82,15 @@ func (m model) Next() base.Model {
 			}
 		}
 	}
-	m.field = next
-	return m
+	for y, row := range next {
+		for x, cell := range row {
+			m.field[y][x] = cell
+		}
+	}
 }
 
 // generateField generates a random field of automata, where each cell has a 1 in 5 chance of being alive.
-func (m model) Populate() base.Model {
+func (m model) Populate() {
 	for y, _ := range m.field {
 		for x, _ := range m.field[y] {
 			if rand.Intn(5) == 0 {
@@ -97,21 +98,18 @@ func (m model) Populate() base.Model {
 			}
 		}
 	}
-	return m
 }
 
-func (m model) Ingest(field [][]int) base.Model {
+func (m model) Ingest(field [][]int) {
 	m.field = field
-	return m
 }
 
-func (m model) ToggleCell(x, y int) base.Model {
+func (m model) ToggleCell(x, y int) {
 	if m.field[y][x] == 1 {
 		m.field[y][x] = 0
 	} else {
 		m.field[y][x] = 1
 	}
-	return m
 }
 
 // View builds the entire screen's worth of cells to be printed by returning a • for a living cell or a space for a dead cell.

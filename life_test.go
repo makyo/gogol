@@ -29,26 +29,26 @@ func acorn() [][]int {
 func BenchmarkEvolveNaive2d(b *testing.B) {
 	var m base.Model
 	m = naive2d.New(256, 256, true)
-	m = m.Ingest(acorn())
+	m.Ingest(acorn())
 	for i := 0; i < b.N; i++ {
-		m = m.Next()
+		m.Next()
 	}
 }
 
 func BenchmarkEvolveNaive1d(b *testing.B) {
 	var m base.Model
 	m = naive1d.New(256, 256, true)
-	m = m.Ingest(acorn())
+	m.Ingest(acorn())
 	for i := 0; i < b.N; i++ {
-		m = m.Next()
+		m.Next()
 	}
 }
 
 func BenchmarkEvolveScholes(b *testing.B) {
 	var m base.Model
 	m = scholes.New(256, 256, true)
-	m = m.Ingest(acorn())
+	m.Ingest(acorn())
 	for i := 0; i < b.N; i++ {
-		m = m.Next()
+		m.Next()
 	}
 }

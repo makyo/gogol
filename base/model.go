@@ -1,9 +1,9 @@
 package base
 
 type Model interface {
-	Next() Model
-	Populate() Model
-	Ingest([][]int) Model
-	ToggleCell(int, int) Model
+	Next()
+	Populate()
+	Ingest([][]int)
+	ToggleCell(int, int)
 	String() string
 }

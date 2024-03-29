@@ -3,8 +3,6 @@ package naive1d
 import (
 	"math"
 	"math/rand"
-
-	"github.com/makyo/gogol/base"
 )
 
 type model struct {
@@ -19,12 +17,12 @@ func (m model) wrapPos(pos int) int {
 }
 
 // nextGeneration evolves the field of automata one generation based on the rules of Conway's Game of Life.
-func (m model) Next() base.Model {
+func (m model) Next() {
 	// Create a new field based on the existing one.
 	next := make([]int, len(m.field))
 
 	// Loop over the cells.
-	for i, cell := range m.field {
+	for i, _ := range m.field {
 		neighborCount := 0
 
 		// Count the adjacent living cells on the row above.
@@ -63,48 +61,45 @@ func (m model) Next() base.Model {
 		// 2. A living cell dies of loneliness if it has 0 or 1 neighbors.
 		// 3. A living cell dies of overcrowding if it has more than 3 neighbors.
 		// 4. A living cell stays alive if it has 2 or 3 neighbors.
-		next[i] = cell
-		if cell == 0 && neighborCount == 3 {
+		next[i] = m.field[i]
+		if m.field[i] == 0 && neighborCount == 3 {
 			next[i] = 1
 			continue
 		}
-		if cell == 1 && (neighborCount < 2 || neighborCount > 3) {
+		if m.field[i] == 1 && (neighborCount < 2 || neighborCount > 3) {
 			next[i] = 0
 		}
 	}
-	m.field = next
-	return m
+	for i, _ := range next {
+		m.field[i] = next[i]
+	}
 }
 
 // Populate generates a random field of automata, where each cell has a 1 in 5 chance of being alive.
-func (m model) Populate() base.Model {
+func (m model) Populate() {
 	for i, _ := range m.field {
 		if rand.Intn(5) == 0 {
 			m.field[i] = 1
 		}
 	}
-	return m
 }
 
-func (m model) Ingest(field [][]int) base.Model {
+func (m model) Ingest(field [][]int) {
 	m.width = len(field[0])
-	m.field = make([]int, m.width*len(field))
 	for row, _ := range field {
 		for col, _ := range field[row] {
 			m.field[row*col] = field[row][col]
 		}
 	}
-	return m
 }
 
-func (m model) ToggleCell(x, y int) base.Model {
+func (m model) ToggleCell(x, y int) {
 	pos := y*m.width + x
 	if m.field[pos] == 1 {
 		m.field[pos] = 0
 	} else {
 		m.field[pos] = 1
 	}
-	return m
 }
 
 // View builds the entire screen's worth of cells to be printed by returning a • for a living cell or a space for a dead cell.
