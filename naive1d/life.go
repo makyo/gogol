@@ -86,6 +86,17 @@ func (m model) Populate() base.Model {
 	return m
 }
 
+func (m model) Ingest(field [][]int) base.Model {
+	m.width = len(field[0])
+	m.field = make([]int, m.width*len(field))
+	for row, _ := range field {
+		for col, _ := range field[row] {
+			m.field[row*col] = field[row][col]
+		}
+	}
+	return m
+}
+
 func (m model) ToggleCell(x, y int) base.Model {
 	pos := y*m.width + x
 	if m.field[pos] == 1 {

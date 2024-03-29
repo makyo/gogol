@@ -100,6 +100,11 @@ func (m model) Populate() base.Model {
 	return m
 }
 
+func (m model) Ingest(field [][]int) base.Model {
+	m.field = field
+	return m
+}
+
 func (m model) ToggleCell(x, y int) base.Model {
 	if m.field[y][x] == 1 {
 		m.field[y][x] = 0

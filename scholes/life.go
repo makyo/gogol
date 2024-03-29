@@ -105,6 +105,17 @@ func (m model) Next() base.Model {
 	return m
 }
 
+func (m model) Ingest(field [][]int) base.Model {
+	m.width = len(field[0])
+	m.field = make([]int, m.width*len(field))
+	for row, _ := range field {
+		for col, _ := range field[row] {
+			m.field[row*col] = field[row][col]
+		}
+	}
+	return m
+}
+
 // Populate generates a random field of automata, where each cell has a 1 in 5 chance of being alive.
 func (m model) Populate() base.Model {
 	for i, _ := range m.field {
