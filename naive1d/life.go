@@ -107,7 +107,7 @@ func (m model) String() string {
 		} else {
 			frame += " "
 		}
-		if i > 0 && i%m.width == 0 {
+		if (i+1)%m.width == 0 {
 			frame += "\n"
 		}
 	}

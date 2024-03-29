@@ -9,6 +9,7 @@ import (
 	"github.com/makyo/gogol/base"
 	"github.com/makyo/gogol/naive1d"
 	"github.com/makyo/gogol/naive2d"
+	"github.com/makyo/gogol/scholes"
 )
 
 type tickMsg time.Time
@@ -31,6 +32,8 @@ func getModel(width, height int, wrap bool) model {
 		m.base = naive1d.New(width, height, wrap)
 	case "naive2d":
 		m.base = naive2d.New(width, height, wrap)
+	case "scholes":
+		m.base = scholes.New(width, height, wrap)
 	}
 	return m
 }
