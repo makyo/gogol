@@ -6,9 +6,9 @@ import (
 )
 
 type model struct {
-	wrap  bool
-	width int
-	field []int
+	width  int
+	height int
+	field  []int
 }
 
 // wrapPos wraps a cell position that would otherwise be outside of a rectangular grid.
@@ -26,34 +26,18 @@ func (m model) Next() {
 		neighborCount := 0
 
 		// Count the adjacent living cells on the row above.
-		if i-m.width > 0 || m.wrap {
-			if i%m.width >= 0 || m.wrap {
-				neighborCount += m.field[m.wrapPos(i-m.width-1)]
-			}
-			neighborCount += m.field[m.wrapPos(i-m.width)]
-			if (i+1)%m.width != 0 || m.wrap {
-				neighborCount += m.field[m.wrapPos(i-m.width+1)]
-			}
-		}
+		neighborCount += m.field[m.wrapPos(i-m.width-1)]
+		neighborCount += m.field[m.wrapPos(i-m.width)]
+		neighborCount += m.field[m.wrapPos(i-m.width+1)]
 
 		// Count the adjacent cells to either side.
-		if i%m.width != 0 || m.wrap {
-			neighborCount += m.field[m.wrapPos(i-1)]
-		}
-		if (i < len(m.field)-1 && (i+1)%m.width != 0) || m.wrap {
-			neighborCount += m.field[m.wrapPos(i+1)]
-		}
+		neighborCount += m.field[m.wrapPos(i-1)]
+		neighborCount += m.field[m.wrapPos(i+1)]
 
 		// Count the adjacent cells on the row below.
-		if i+m.width < len(m.field) || m.wrap {
-			if i%m.width >= 0 || m.wrap {
-				neighborCount += m.field[m.wrapPos(i+m.width-1)]
-			}
-			neighborCount += m.field[m.wrapPos(i+m.width)]
-			if (i+1)%m.width != 0 || m.wrap {
-				neighborCount += m.field[m.wrapPos(i+m.width+1)]
-			}
-		}
+		neighborCount += m.field[m.wrapPos(i+m.width-1)]
+		neighborCount += m.field[m.wrapPos(i+m.width)]
+		neighborCount += m.field[m.wrapPos(i+m.width+1)]
 
 		// Evolve the current cell by the following rules:
 		//
@@ -113,7 +97,7 @@ func (m model) String() string {
 		} else {
 			frame += " "
 		}
-		if (i+1)%m.width == 0 {
+		if (i)%m.width == 0 {
 			frame += "\n"
 		}
 	}
@@ -121,10 +105,10 @@ func (m model) String() string {
 	return frame
 }
 
-func New(width, height int, wrap bool) model {
+func New(width, height int) model {
 	return model{
-		wrap:  wrap,
-		width: width,
-		field: make([]int, width*height),
+		width:  width,
+		height: height,
+		field:  make([]int, width*height),
 	}
 }

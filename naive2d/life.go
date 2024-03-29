@@ -6,14 +6,14 @@ import (
 )
 
 type model struct {
-	wrap  bool
-	width int
-	field [][]int
+	width  int
+	height int
+	field  [][]int
 }
 
 // wrapPos wraps a cell position that would otherwise be outside of a rectangular grid.
-func (m model) wrapPos(pos int) int {
-	return int(math.Abs(float64(pos))) % len(m.field)
+func (m model) wrapPos(x, y int) int {
+	return m.field[int(math.Abs(float64(m.height+y)))%m.height][int(math.Abs(float64(m.width+x)))%m.width]
 }
 
 // nextGeneration evolves the field of automata one generation based on the rules of Conway's Game of Life.
@@ -32,34 +32,18 @@ func (m model) Next() {
 			neighborCount := 0
 
 			// Count the adjacent living cells on the row above.
-			if y-1 >= 0 {
-				if x-1 >= 0 {
-					neighborCount += m.field[y-1][x-1]
-				}
-				neighborCount += m.field[y-1][x]
-				if x+1 < len(m.field[y]) {
-					neighborCount += m.field[y-1][x+1]
-				}
-			}
+			neighborCount += m.wrapPos(x-1, y-1)
+			neighborCount += m.wrapPos(x, y-1)
+			neighborCount += m.wrapPos(x+1, y-1)
 
 			// Count the adjacent cells to either side.
-			if x-1 >= 0 {
-				neighborCount += m.field[y][x-1]
-			}
-			if x+1 < len(m.field[y]) {
-				neighborCount += m.field[y][x+1]
-			}
+			neighborCount += m.wrapPos(x-1, y)
+			neighborCount += m.wrapPos(x+1, y)
 
 			// Count the adjacent cells on the row below.
-			if y+1 < len(m.field) {
-				if x-1 >= 0 {
-					neighborCount += m.field[y+1][x-1]
-				}
-				neighborCount += m.field[y+1][x]
-				if x+1 < len(m.field[y]) {
-					neighborCount += m.field[y+1][x+1]
-				}
-			}
+			neighborCount += m.wrapPos(x-1, y+1)
+			neighborCount += m.wrapPos(x, y+1)
+			neighborCount += m.wrapPos(x+1, y+1)
 
 			// Evolve the current cell by the following rules:
 			//
@@ -118,6 +102,7 @@ func (m model) String() string {
 
 	// Loop over rows...
 	for _, row := range m.field {
+		frame += "\n"
 
 		// Loop over collumns...
 		for _, col := range row {
@@ -129,17 +114,15 @@ func (m model) String() string {
 				frame += " "
 			}
 		}
-
-		// Newline at the end of every row.
-		frame += "\n"
 	}
 	return frame
 }
 
-func New(width, height int, wrap bool) model {
+func New(width, height int) model {
 	m := model{
-		wrap:  wrap,
-		field: make([][]int, height),
+		width:  width,
+		height: height,
+		field:  make([][]int, height),
 	}
 	for i := 0; i < height; i++ {
 		m.field[i] = make([]int, width)

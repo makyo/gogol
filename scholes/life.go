@@ -5,7 +5,6 @@ import (
 )
 
 type model struct {
-	wrap  bool
 	width int
 	field []int
 }
@@ -150,9 +149,8 @@ func (m model) String() string {
 	return frame
 }
 
-func New(width, height int, wrap bool) model {
+func New(width, height int) model {
 	return model{
-		wrap:  wrap,
 		width: width,
 		field: make([]int, width*height),
 	}

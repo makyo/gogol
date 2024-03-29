@@ -3,6 +3,7 @@ package main
 import (
 	"testing"
 
+	"github.com/makyo/gogol/abrash"
 	"github.com/makyo/gogol/base"
 	"github.com/makyo/gogol/naive1d"
 	"github.com/makyo/gogol/naive2d"
@@ -28,7 +29,7 @@ func acorn() [][]int {
 
 func BenchmarkEvolveNaive2d(b *testing.B) {
 	var m base.Model
-	m = naive2d.New(256, 256, true)
+	m = naive2d.New(256, 256)
 	m.Ingest(acorn())
 	for i := 0; i < b.N; i++ {
 		m.Next()
@@ -37,7 +38,7 @@ func BenchmarkEvolveNaive2d(b *testing.B) {
 
 func BenchmarkEvolveNaive1d(b *testing.B) {
 	var m base.Model
-	m = naive1d.New(256, 256, true)
+	m = naive1d.New(256, 256)
 	m.Ingest(acorn())
 	for i := 0; i < b.N; i++ {
 		m.Next()
@@ -46,7 +47,16 @@ func BenchmarkEvolveNaive1d(b *testing.B) {
 
 func BenchmarkEvolveScholes(b *testing.B) {
 	var m base.Model
-	m = scholes.New(256, 256, true)
+	m = scholes.New(256, 256)
+	m.Ingest(acorn())
+	for i := 0; i < b.N; i++ {
+		m.Next()
+	}
+}
+
+func BenchmarkEvolveAbrash(b *testing.B) {
+	var m base.Model
+	m = abrash.New(256, 256)
 	m.Ingest(acorn())
 	for i := 0; i < b.N; i++ {
 		m.Next()

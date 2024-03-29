@@ -5,16 +5,19 @@ Golang Game of Life explorations
 
 While this project originally started out as a way to teach myself some [Charm.sh](https://charm.sh) tools, it turned into an algorithm exploration. I am primarily working through Eric Lippert's [series on the topic](https://conwaylife.com/wiki/Tutorials/Coding_Life_simulators).
 
-Current status: a naive implementation of the algorithm using a 2-d arrayis the winner, followed by Scholes's algorithm, then a naive 1-d array. However, I have not done much optimization on the first two yet.
+Benchmarks are run with:
+
+    go test -bench . -benchtime=10s -benchmem
 
 ```
 goos: linux
 goarch: amd64
 pkg: github.com/makyo/gogol
 cpu: Intel(R) Core(TM) i7-10510U CPU @ 1.80GHz
-BenchmarkEvolveNaive2d-8   	  19618	   686576 ns/op	 530487 B/op	    257 allocs/op
-BenchmarkEvolveNaive1d-8   	   1260	  9047516 ns/op	 525125 B/op	      1 allocs/op
-BenchmarkEvolveScholes-8   	   5683	  2177095 ns/op	5767465 B/op	     11 allocs/op
+BenchmarkEvolveNaive2d-8   	    1353	  11982964 ns/op	  531220 B/op	     257 allocs/op
+BenchmarkEvolveNaive1d-8   	    1861	   5965848 ns/op	  524857 B/op	       1 allocs/op
+BenchmarkEvolveScholes-8   	    5846	   2186120 ns/op	 5767457 B/op	      11 allocs/op
+BenchmarkEvolveAbrash-8    	   18666	    598567 ns/op	 1054806 B/op	     257 allocs/op
 PASS
-ok  	github.com/makyo/gogol	44.592s
+ok  	github.com/makyo/gogol	59.537s
 ```

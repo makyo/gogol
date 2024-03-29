@@ -6,6 +6,7 @@ import (
 	"time"
 
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/makyo/gogol/abrash"
 	"github.com/makyo/gogol/base"
 	"github.com/makyo/gogol/naive1d"
 	"github.com/makyo/gogol/naive2d"
@@ -19,21 +20,22 @@ type model struct {
 }
 
 var (
-	wrapFlag = flag.Bool("wrap", false, "Wrap the grid at the edges, treating it like a toroid")
 	algoFlag = flag.String("algo", "naive1d", "Which algorithm to use (life1d, life2d)")
-	width    = 0
-	height   = 0
+	width    = 10
+	height   = 10
 )
 
-func getModel(width, height int, wrap bool) model {
+func getModel(width, height int) model {
 	m := model{}
 	switch *algoFlag {
 	case "naive1d":
-		m.base = naive1d.New(width, height, wrap)
+		m.base = naive1d.New(width, height)
 	case "naive2d":
-		m.base = naive2d.New(width, height, wrap)
+		m.base = naive2d.New(width, height)
 	case "scholes":
-		m.base = scholes.New(width, height, wrap)
+		m.base = scholes.New(width, height)
+	case "abrash":
+		m.base = abrash.New(width, height)
 	}
 	return m
 }
@@ -64,7 +66,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		// Regenerate the field on Ctrl+R
 		case "ctrl+r":
-			m = getModel(width, height, *wrapFlag)
+			m = getModel(width, height)
 			return m, nil
 		}
 
@@ -76,11 +78,14 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	// Window size messages — we receive one initially, and then again on every resize
 	case tea.WindowSizeMsg:
+		if msg.Width <= 0 || msg.Height <= 0 {
+			return m, nil
+		}
 
 		// Reset the field to the correct size
 		width = msg.Width
 		height = msg.Height
-		m = getModel(width, height, *wrapFlag)
+		m = getModel(width, height)
 		m.base.Populate()
 
 	// Tick messages
@@ -100,7 +105,7 @@ func (m model) View() string {
 
 func main() {
 	flag.Parse()
-	p := tea.NewProgram(getModel(width, height, *wrapFlag), tea.WithAltScreen(), tea.WithMouseAllMotion())
+	p := tea.NewProgram(getModel(width, height), tea.WithAltScreen(), tea.WithMouseAllMotion())
 	if _, err := p.Run(); err != nil {
 		log.Fatal(err)
 	}
