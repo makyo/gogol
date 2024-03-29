@@ -12,7 +12,8 @@ type model struct {
 	field []int
 }
 
-func moveLeft(field []int, width int) []int {
+// shiftLeft returns a copy of the field which has been moved left, wrapping around on the far edge.
+func shiftLeft(field []int, width int) []int {
 	shifted := make([]int, len(field))
 	for i, cell := range field {
 		if i == 0 {
@@ -24,7 +25,8 @@ func moveLeft(field []int, width int) []int {
 	return shifted
 }
 
-func moveRight(field []int, width int) []int {
+// shiftRight returns a copy of the field which has been moved right, wrapping around on the far edge.
+func shiftRight(field []int, width int) []int {
 	shifted := make([]int, len(field))
 	for i, cell := range field {
 		if i == len(shifted)-1 {
@@ -36,7 +38,8 @@ func moveRight(field []int, width int) []int {
 	return shifted
 }
 
-func moveUp(field []int, width int) []int {
+// shiftUp returns a copy of the field which has been moved up, wrapping around on the far edge.
+func shiftUp(field []int, width int) []int {
 	shifted := make([]int, len(field))
 	for i, cell := range field {
 		if i < width {
@@ -48,7 +51,8 @@ func moveUp(field []int, width int) []int {
 	return shifted
 }
 
-func moveDown(field []int, width int) []int {
+// shiftDown returns a copy of the field which has been moved down, wrapping around on the far edge.
+func shiftDown(field []int, width int) []int {
 	shifted := make([]int, len(field))
 	for i, cell := range field {
 		if i > len(shifted)-width-1 {
@@ -60,49 +64,32 @@ func moveDown(field []int, width int) []int {
 	return shifted
 }
 
-func sumShifted(a, b []int) []int {
-	result := make([]int, len(a))
-	for i, cell := range a {
-		result[i] = cell + b[i]
+func where(field []int, which int) []int {
+	result := make([]int, len(field))
+	for i, cell := range field {
+		if cell == which {
+			result[i] = 1
+		}
 	}
 	return result
 }
 
+// sumField sums the values of the field along with the field shifted one space to each of the cardinal and ordinal compass points.
 func sumField(field []int, width int) []int {
 	result := make([]int, len(field))
-	copy(result, field)
 
-	// Move west, sum
-	shifted := moveLeft(field, width)
-	result = sumShifted(result, shifted)
+	west := shiftLeft(field, width)
+	northwest := shiftUp(west, width)
+	north := shiftRight(northwest, width)
+	northeast := shiftRight(north, width)
+	east := shiftDown(northeast, width)
+	southeast := shiftDown(east, width)
+	south := shiftLeft(southeast, width)
+	southwest := shiftLeft(south, width)
 
-	// Northwest
-	shifted = moveUp(shifted, width)
-	result = sumShifted(result, shifted)
-
-	// North
-	shifted = moveRight(shifted, width)
-	result = sumShifted(result, shifted)
-
-	// Northeast
-	shifted = moveRight(shifted, width)
-	result = sumShifted(result, shifted)
-
-	// East
-	shifted = moveDown(shifted, width)
-	result = sumShifted(result, shifted)
-
-	// Southeast
-	shifted = moveDown(shifted, width)
-	result = sumShifted(result, shifted)
-
-	// South
-	shifted = moveLeft(shifted, width)
-	result = sumShifted(result, shifted)
-
-	// Southwest
-	shifted = moveLeft(shifted, width)
-	result = sumShifted(result, shifted)
+	for i, cell := range field {
+		result[i] = cell + west[i] + northwest[i] + north[i] + northeast[i] + east[i] + southeast[i] + south[i] + southwest[i]
+	}
 
 	return result
 }
@@ -110,16 +97,10 @@ func sumField(field []int, width int) []int {
 // Next evolves the field one generation.
 func (m model) Next() base.Model {
 	sum := sumField(m.field, m.width)
-	for i, cell := range sum {
-		if m.field[i] == 1 {
-			if cell < 3 || cell > 4 {
-				m.field[i] = 0
-			}
-		} else {
-			if cell == 3 {
-				m.field[i] = 1
-			}
-		}
+	threes := where(sum, 3)
+	fours := where(sum, 4)
+	for i, cell := range m.field {
+		m.field[i] = threes[i] | fours[i]&cell
 	}
 	return m
 }
