@@ -3,6 +3,8 @@ package abrash
 import (
 	"math"
 	"math/rand"
+
+	"github.com/makyo/gogol/rle"
 )
 
 type cell struct {
@@ -125,10 +127,14 @@ func (m model) Populate() {
 }
 
 // Ingest sets the field to the given value.
-func (m model) Ingest(field [][]int) {
-	for y, row := range field {
-		for x, v := range row {
-			m.field[y][x].state = v
+func (m model) Ingest(f *rle.RLEField) {
+	startX := (m.width - f.Width) / 2
+	startY := (m.height - f.Height) / 2
+	for y, row := range f.Field {
+		for x, col := range row {
+			if col {
+				m.field[y+startY][x+startX].state = 1
+			}
 		}
 	}
 	m.calculateAllNeighbors()

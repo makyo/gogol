@@ -3,6 +3,8 @@ package naive1d
 import (
 	"math"
 	"math/rand"
+
+	"github.com/makyo/gogol/rle"
 )
 
 type model struct {
@@ -68,11 +70,14 @@ func (m model) Populate() {
 	}
 }
 
-func (m model) Ingest(field [][]int) {
-	m.width = len(field[0])
-	for row, _ := range field {
-		for col, _ := range field[row] {
-			m.field[row*col] = field[row][col]
+func (m model) Ingest(f *rle.RLEField) {
+	startY := (m.width - f.Width) / 2
+	startX := (m.height - f.Height) / 2
+	for y, row := range f.Field {
+		for x, col := range row {
+			if col {
+				m.field[(y+startY)*(x+startX)] = 1
+			}
 		}
 	}
 }

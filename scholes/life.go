@@ -2,11 +2,14 @@ package scholes
 
 import (
 	"math/rand"
+
+	"github.com/makyo/gogol/rle"
 )
 
 type model struct {
-	width int
-	field []int
+	width  int
+	height int
+	field  []int
 }
 
 // shiftLeft returns a copy of the field which has been moved left, wrapping around on the far edge.
@@ -101,12 +104,14 @@ func (m model) Next() {
 	}
 }
 
-func (m model) Ingest(field [][]int) {
-	m.width = len(field[0])
-	m.field = make([]int, m.width*len(field))
-	for row, _ := range field {
-		for col, _ := range field[row] {
-			m.field[row*col] = field[row][col]
+func (m model) Ingest(f *rle.RLEField) {
+	startY := (m.width - f.Width) / 2
+	startX := (m.height - f.Height) / 2
+	for y, row := range f.Field {
+		for x, col := range row {
+			if col {
+				m.field[(y+startY)*(x+startX)] = 1
+			}
 		}
 	}
 }
@@ -151,7 +156,8 @@ func (m model) String() string {
 
 func New(width, height int) model {
 	return model{
-		width: width,
-		field: make([]int, width*height),
+		width:  width,
+		height: height,
+		field:  make([]int, width*height),
 	}
 }

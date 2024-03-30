@@ -7,24 +7,25 @@ import (
 	"github.com/makyo/gogol/base"
 	"github.com/makyo/gogol/naive1d"
 	"github.com/makyo/gogol/naive2d"
+	"github.com/makyo/gogol/rle"
 	"github.com/makyo/gogol/scholes"
 )
 
-var num = 1
+var (
+	num = 1
+)
 
-func acorn() [][]int {
-	field := make([][]int, 256)
-	for i, _ := range field {
-		field[i] = make([]int, 256)
+func acorn() *rle.RLEField {
+	f, err := rle.Unmarshal(`#N Acorn
+#O Charles Corderman
+#C A methuselah with lifespan 5206.
+#C www.conwaylife.com/wiki/index.php?title=Acorn
+x = 7, y = 3, rule = B3/S23
+bo5b$3bo3b$2o2b3o!`)
+	if err != nil {
+		panic(err)
 	}
-	field[128][128] = 1
-	field[128][129] = 1
-	field[130][129] = 1
-	field[129][131] = 1
-	field[128][132] = 1
-	field[128][133] = 1
-	field[128][134] = 1
-	return field
+	return f
 }
 
 func BenchmarkEvolveNaive2d(b *testing.B) {

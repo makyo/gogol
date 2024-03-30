@@ -3,6 +3,8 @@ package naive2d
 import (
 	"math"
 	"math/rand"
+
+	"github.com/makyo/gogol/rle"
 )
 
 type model struct {
@@ -84,8 +86,16 @@ func (m model) Populate() {
 	}
 }
 
-func (m model) Ingest(field [][]int) {
-	m.field = field
+func (m model) Ingest(f *rle.RLEField) {
+	startX := (m.width - f.Width) / 2
+	startY := (m.height - f.Height) / 2
+	for y, row := range f.Field {
+		for x, col := range row {
+			if col {
+				m.field[y+startY][x+startX] = 1
+			}
+		}
+	}
 }
 
 func (m model) ToggleCell(x, y int) {
