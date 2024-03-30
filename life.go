@@ -7,6 +7,7 @@ import (
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/makyo/gogol/abrash"
+	"github.com/makyo/gogol/abrashbitwise"
 	"github.com/makyo/gogol/base"
 	"github.com/makyo/gogol/naive1d"
 	"github.com/makyo/gogol/naive2d"
@@ -20,7 +21,7 @@ type model struct {
 }
 
 var (
-	algoFlag = flag.String("algo", "naive1d", "Which algorithm to use (life1d, life2d)")
+	algoFlag = flag.String("algo", "naive1d", "Which algorithm to use (naive1d, naive2d, scholes, abrash, abrashbitwise)")
 	width    = 10
 	height   = 10
 )
@@ -36,6 +37,8 @@ func getModel(width, height int) model {
 		m.base = scholes.New(width, height)
 	case "abrash":
 		m.base = abrash.New(width, height)
+	case "abrashbitwise":
+		m.base = abrashbitwise.New(width, height)
 	}
 	return m
 }
