@@ -7,9 +7,40 @@ import (
 	"github.com/makyo/gogol/rle"
 )
 
-type cell struct {
-	state     int
-	neighbors int
+// Bitwise operations are not my strong suit, so lots of comments ahead to help me understand.
+
+// A cell is just a byte, which holds both the neighbor count and the state.
+type cell byte
+
+const (
+	// Store the current state of the cell in the fourth bit (so 0000x000). This is mostly syntactic sugar, meaning...
+	state = 4
+
+	// ...if we shift 1 over 4 spots, we get the fourth bit (16).
+	statebit = 1 << state
+
+	// We can thus use everything less than that (15) for the count of neighbors.
+	countbit = 0xf
+)
+
+// state gets the state of the cell by AND-ing the fourth bit. The result will be 0 (so, dead) for anything where 00001000 is not true.
+func (c cell) state() bool {
+	return (c & statebit) != 0
+}
+
+// neighbors gets the count of neighbors by AND-ing everything below the fourth bit (00000111). The result will be the remainder. Essentually mod statebit.
+func (c cell) neighbors() cell {
+	return c & countbit
+}
+
+// vivify makes the cell alive by OR-ing the fourth bit (so, noop if it's already alive).
+func (c cell) vivify() cell {
+	return c | statebit
+}
+
+// kill makes the cell dead by AND-ing the bit with NOT the fourth bit (so, AND-ing with false).
+func (c cell) kill() cell {
+	return c &^ statebit
 }
 
 type model struct {
@@ -23,47 +54,82 @@ func (m model) wrapPos(x, y int) (int, int) {
 	return int(math.Abs(float64(m.width+x))) % m.width, int(math.Abs(float64(m.height+y))) % m.height
 }
 
-// addToNeighbors adds amount to all neighboring cells neighbors amount.
-func (m model) addToNeighbors(amount, x, y int) {
+// addToNeighbors to all neighboring cells.
+func (m model) addToNeighbors(x, y int) {
 	// West
 	newX, newY := m.wrapPos(x-1, y)
-	m.field[newY][newX].neighbors += amount
+	m.field[newY][newX] += 0x1
 
 	// Northwest
 	newX, newY = m.wrapPos(x-1, y-1)
-	m.field[newY][newX].neighbors += amount
+	m.field[newY][newX] += 0x1
 
 	// North
 	newX, newY = m.wrapPos(x, y-1)
-	m.field[newY][newX].neighbors += amount
+	m.field[newY][newX] += 0x1
 
 	// Northeast
 	newX, newY = m.wrapPos(x+1, y-1)
-	m.field[newY][newX].neighbors += amount
+	m.field[newY][newX] += 0x1
 
 	// East
 	newX, newY = m.wrapPos(x+1, y)
-	m.field[newY][newX].neighbors += amount
+	m.field[newY][newX] += 0x1
 
 	// Southeast
 	newX, newY = m.wrapPos(x+1, y+1)
-	m.field[newY][newX].neighbors += amount
+	m.field[newY][newX] += 0x1
 
 	// South
 	newX, newY = m.wrapPos(x, y+1)
-	m.field[newY][newX].neighbors += amount
+	m.field[newY][newX] += 0x1
 
 	// Southwest
 	newX, newY = m.wrapPos(x-1, y+1)
-	m.field[newY][newX].neighbors += amount
+	m.field[newY][newX] += 0x1
+}
+
+// subtractFromNeighbors subtracts from all neighboring cells.
+func (m model) subtractFromNeighbors(x, y int) {
+	// West
+	newX, newY := m.wrapPos(x-1, y)
+	m.field[newY][newX] -= 0x1
+
+	// Northwest
+	newX, newY = m.wrapPos(x-1, y-1)
+	m.field[newY][newX] -= 0x1
+
+	// North
+	newX, newY = m.wrapPos(x, y-1)
+	m.field[newY][newX] -= 0x1
+
+	// Northeast
+	newX, newY = m.wrapPos(x+1, y-1)
+	m.field[newY][newX] -= 0x1
+
+	// East
+	newX, newY = m.wrapPos(x+1, y)
+	m.field[newY][newX] -= 0x1
+
+	// Southeast
+	newX, newY = m.wrapPos(x+1, y+1)
+	m.field[newY][newX] -= 0x1
+
+	// South
+	newX, newY = m.wrapPos(x, y+1)
+	m.field[newY][newX] -= 0x1
+
+	// Southwest
+	newX, newY = m.wrapPos(x-1, y+1)
+	m.field[newY][newX] -= 0x1
 }
 
 // calculateNeighbors calculates alive neighbors for every cell in the model.
 func (m model) calculateAllNeighbors() {
 	for y, _ := range m.field {
 		for x, c := range m.field[y] {
-			if c.state == 1 {
-				m.addToNeighbors(1, x, y)
+			if c.state() {
+				m.addToNeighbors(x, y)
 			}
 		}
 	}
@@ -71,14 +137,14 @@ func (m model) calculateAllNeighbors() {
 
 // makeAlive sets the cell state to alive and increments the neighbor count. It assumes the cell is dead.
 func (m model) makeAlive(x, y int) {
-	m.addToNeighbors(1, x, y)
-	m.field[y][x].state = 1
+	m.addToNeighbors(x, y)
+	m.field[y][x] = m.field[y][x].vivify()
 }
 
 // makeDead sets the cell state to dead and decrements the neighbor count. It assumes the cell is alive.
 func (m model) makeDead(x, y int) {
-	m.addToNeighbors(-1, x, y)
-	m.field[y][x].state = 0
+	m.subtractFromNeighbors(x, y)
+	m.field[y][x] = m.field[y][x].kill()
 }
 
 // nextGeneration evolves the field of automata one generation based on the rules of Conway's Game of Life.
@@ -88,8 +154,7 @@ func (m model) Next() {
 	for y, _ := range m.field {
 		next[y] = make([]cell, m.width)
 		for x, _ := range m.field[y] {
-			next[y][x].state = m.field[y][x].state
-			next[y][x].neighbors = m.field[y][x].neighbors
+			next[y][x] = m.field[y][x]
 		}
 	}
 
@@ -99,15 +164,15 @@ func (m model) Next() {
 		// Loop over columns...
 		for x, c := range row {
 
-			// If a cell has zero alive neighbors, it's just going to stay dead.
-			if c.neighbors == 0 && c.state == 0 {
+			// If a cell has zero alive neighbors and is already dead, it's just going to stay dead.
+			if c == 0 {
 				continue
 			}
-			if c.state == 1 {
-				if c.neighbors != 2 && c.neighbors != 3 {
+			if c.state() {
+				if c.neighbors() != 0x2 && c.neighbors() != 0x3 {
 					m.makeDead(x, y)
 				}
-			} else if c.neighbors == 3 {
+			} else if c.neighbors() == 0x3 {
 				m.makeAlive(x, y)
 			}
 		}
@@ -118,8 +183,9 @@ func (m model) Next() {
 func (m model) Populate() {
 	for y, _ := range m.field {
 		for x, _ := range m.field[y] {
+			m.field[y][x] = 0x0
 			if rand.Intn(5) == 0 {
-				m.field[y][x].state = 1
+				m.field[y][x] = m.field[y][x].vivify()
 			}
 		}
 	}
@@ -133,7 +199,7 @@ func (m model) Ingest(f *rle.RLEField) {
 	for y, row := range f.Field {
 		for x, col := range row {
 			if col {
-				m.field[y+startY][x+startX].state = 1
+				m.field[y+startY][x+startX] = m.field[y+startY][x+startX].vivify()
 			}
 		}
 	}
@@ -141,10 +207,10 @@ func (m model) Ingest(f *rle.RLEField) {
 }
 
 func (m model) ToggleCell(x, y int) {
-	if m.field[y][x].state == 1 {
-		m.field[y][x].state = 0
+	if m.field[y][x].state() {
+		m.field[y][x] = m.field[y][x].vivify()
 	} else {
-		m.field[y][x].state = 1
+		m.field[y][x] = m.field[y][x].kill()
 	}
 }
 
@@ -160,7 +226,7 @@ func (m model) String() string {
 		for _, col := range row {
 
 			// Set the cell contents
-			if col.state == 1 {
+			if col.state() {
 				frame += "•"
 			} else {
 				frame += " "

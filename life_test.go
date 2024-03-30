@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	"github.com/makyo/gogol/abrash"
-	"github.com/makyo/gogol/abrashbitwise"
+	"github.com/makyo/gogol/abrashstruct"
 	"github.com/makyo/gogol/base"
 	"github.com/makyo/gogol/naive1d"
 	"github.com/makyo/gogol/naive2d"
@@ -56,18 +56,18 @@ func BenchmarkEvolveScholes(b *testing.B) {
 	}
 }
 
-func BenchmarkEvolveAbrash(b *testing.B) {
+func BenchmarkEvolveAbrashStruct(b *testing.B) {
 	var m base.Model
-	m = abrash.New(256, 256)
+	m = abrashstruct.New(256, 256)
 	m.Ingest(acorn())
 	for i := 0; i < b.N; i++ {
 		m.Next()
 	}
 }
 
-func BenchmarkEvolveAbrashBitwise(b *testing.B) {
+func BenchmarkEvolveAbrash(b *testing.B) {
 	var m base.Model
-	m = abrashbitwise.New(256, 256)
+	m = abrash.New(256, 256)
 	m.Ingest(acorn())
 	for i := 0; i < b.N; i++ {
 		m.Next()
