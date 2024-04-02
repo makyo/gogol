@@ -5,10 +5,11 @@ import (
 
 	"github.com/makyo/gogol/abrash"
 	"github.com/makyo/gogol/abrash1d"
+	"github.com/makyo/gogol/abrashchangelist"
 	"github.com/makyo/gogol/abrashstruct"
-	"github.com/makyo/gogol/base"
 	"github.com/makyo/gogol/naive1d"
 	"github.com/makyo/gogol/naive2d"
+	"github.com/makyo/gogol/prestafford1"
 	"github.com/makyo/gogol/rle"
 	"github.com/makyo/gogol/scholes"
 )
@@ -31,8 +32,7 @@ bo5b$3bo3b$2o2b3o!`)
 }
 
 func BenchmarkEvolveNaive2d(b *testing.B) {
-	var m base.Model
-	m = naive2d.New(256, 256)
+	m := naive2d.New(256, 256)
 	m.Ingest(acorn())
 	for i := 0; i < b.N; i++ {
 		m.Next()
@@ -40,8 +40,7 @@ func BenchmarkEvolveNaive2d(b *testing.B) {
 }
 
 func BenchmarkEvolveNaive1d(b *testing.B) {
-	var m base.Model
-	m = naive1d.New(256, 256)
+	m := naive1d.New(256, 256)
 	m.Ingest(acorn())
 	for i := 0; i < b.N; i++ {
 		m.Next()
@@ -49,8 +48,7 @@ func BenchmarkEvolveNaive1d(b *testing.B) {
 }
 
 func BenchmarkEvolveScholes(b *testing.B) {
-	var m base.Model
-	m = scholes.New(256, 256)
+	m := scholes.New(256, 256)
 	m.Ingest(acorn())
 	for i := 0; i < b.N; i++ {
 		m.Next()
@@ -58,8 +56,7 @@ func BenchmarkEvolveScholes(b *testing.B) {
 }
 
 func BenchmarkEvolveAbrashStruct(b *testing.B) {
-	var m base.Model
-	m = abrashstruct.New(256, 256)
+	m := abrashstruct.New(256, 256)
 	m.Ingest(acorn())
 	for i := 0; i < b.N; i++ {
 		m.Next()
@@ -67,8 +64,7 @@ func BenchmarkEvolveAbrashStruct(b *testing.B) {
 }
 
 func BenchmarkEvolveAbrash(b *testing.B) {
-	var m base.Model
-	m = abrash.New(256, 256)
+	m := abrash.New(256, 256)
 	m.Ingest(acorn())
 	for i := 0; i < b.N; i++ {
 		m.Next()
@@ -76,8 +72,23 @@ func BenchmarkEvolveAbrash(b *testing.B) {
 }
 
 func BenchmarkEvolveAbrash1d(b *testing.B) {
-	var m base.Model
-	m = abrash1d.New(256, 256)
+	m := abrash1d.New(256, 256)
+	m.Ingest(acorn())
+	for i := 0; i < b.N; i++ {
+		m.Next()
+	}
+}
+
+func BenchmarkEvolveAbrashChangelist(b *testing.B) {
+	m := abrashchangelist.New(256, 256)
+	m.Ingest(acorn())
+	for i := 0; i < b.N; i++ {
+		m.Next()
+	}
+}
+
+func BenchmarkEvolvePrestafford1(b *testing.B) {
+	m := prestafford1.New(256, 256)
 	m.Ingest(acorn())
 	for i := 0; i < b.N; i++ {
 		m.Next()

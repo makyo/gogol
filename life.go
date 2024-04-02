@@ -8,10 +8,12 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/makyo/gogol/abrash"
 	"github.com/makyo/gogol/abrash1d"
+	"github.com/makyo/gogol/abrashchangelist"
 	"github.com/makyo/gogol/abrashstruct"
 	"github.com/makyo/gogol/base"
 	"github.com/makyo/gogol/naive1d"
 	"github.com/makyo/gogol/naive2d"
+	"github.com/makyo/gogol/prestafford1"
 	"github.com/makyo/gogol/scholes"
 )
 
@@ -22,7 +24,7 @@ type model struct {
 }
 
 var (
-	algoFlag = flag.String("algo", "naive1d", "Which algorithm to use (naive1d, naive2d, scholes, abrashstruct, abrash, abrash1d)")
+	algoFlag = flag.String("algo", "naive1d", "Which algorithm to use (naive1d, naive2d, scholes, abrashstruct, abrash, abrash1d, abrashchangelist, prestafford1)")
 	width    = 10
 	height   = 10
 )
@@ -42,6 +44,10 @@ func getModel(width, height int) model {
 		m.base = abrash.New(width, height)
 	case "abrash1d":
 		m.base = abrash1d.New(width, height)
+	case "abrashchangelist":
+		m.base = abrashchangelist.New(width, height)
+	case "prestafford1":
+		m.base = prestafford1.New(width, height)
 	}
 	return m
 }

@@ -14,12 +14,14 @@ goos: linux
 goarch: amd64
 pkg: github.com/makyo/gogol
 cpu: Intel(R) Core(TM) i7-10510U CPU @ 1.80GHz
-BenchmarkEvolveNaive2d-8        	    1436	  10173303 ns/op	  531187 B/op	     257 allocs/op
-BenchmarkEvolveNaive1d-8        	    2203	   5615695 ns/op	  524527 B/op	       1 allocs/op
-BenchmarkEvolveScholes-8        	    7864	   1926182 ns/op	 5767254 B/op	      11 allocs/op
-BenchmarkEvolveAbrashStruct-8   	   21536	    538795 ns/op	 1055156 B/op	     257 allocs/op
-BenchmarkEvolveAbrash-8         	   72214	    164118 ns/op	   72065 B/op	     257 allocs/op
-BenchmarkEvolveAbrash1d-8       	   94778	    110808 ns/op	   65536 B/op	       1 allocs/op
+BenchmarkEvolveNaive2d-8            	    1609	   8735432 ns/op	  531148 B/op	     257 allocs/op
+BenchmarkEvolveNaive1d-8            	    2317	   5157689 ns/op	  524515 B/op	       1 allocs/op
+BenchmarkEvolveScholes-8            	    6955	   1928381 ns/op	 5767259 B/op	      11 allocs/op
+BenchmarkEvolveAbrashStruct-8       	   23722	    520863 ns/op	 1055151 B/op	     257 allocs/op
+BenchmarkEvolveAbrash-8             	   67591	    167219 ns/op	   72065 B/op	     257 allocs/op
+BenchmarkEvolveAbrash1d-8           	  115836	    101178 ns/op	   65536 B/op	       1 allocs/op
+BenchmarkEvolveAbrashChangelist-8   	  133270	     82912 ns/op	  106091 B/op	      14 allocs/op
+BenchmarkEvolvePrestafford1-8       	  382392	     32084 ns/op	   54899 B/op	      24 allocs/op
 PASS
-ok  	github.com/makyo/gogol	86.224s
+ok  	github.com/makyo/gogol	117.524s
 ```

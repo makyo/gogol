@@ -1,4 +1,4 @@
-package abrash1d
+package abrashchangelist
 
 import (
 	"math"
@@ -44,9 +44,10 @@ func (c cell) kill() cell {
 }
 
 type model struct {
-	width  int
-	height int
-	field  []cell
+	width   int
+	height  int
+	field   []cell
+	changes []int
 }
 
 // wrapPos wraps a cell position that would otherwise be outside of a rectangular grid.
@@ -56,116 +57,142 @@ func (m *model) wrapPos(pos int) int {
 
 // addToNeighbors to all neighboring cells.
 func (m *model) addToNeighbors(pos int) {
+	m.changes = append(m.changes, pos)
+
 	// West
 	newPos := m.wrapPos(pos - 1)
 	m.field[newPos] += 0x1
+	m.changes = append(m.changes, newPos)
 
 	// Northwest
 	newPos = m.wrapPos(pos - m.width - 1)
 	m.field[newPos] += 0x1
+	m.changes = append(m.changes, newPos)
 
 	// North
 	newPos = m.wrapPos(pos - m.width)
 	m.field[newPos] += 0x1
+	m.changes = append(m.changes, newPos)
 
 	// Northeast
 	newPos = m.wrapPos(pos - m.width + 1)
 	m.field[newPos] += 0x1
+	m.changes = append(m.changes, newPos)
 
 	// East
 	newPos = m.wrapPos(pos + 1)
 	m.field[newPos] += 0x1
+	m.changes = append(m.changes, newPos)
 
 	// Southeast
 	newPos = m.wrapPos(pos + m.width + 1)
 	m.field[newPos] += 0x1
+	m.changes = append(m.changes, newPos)
 
 	// South
 	newPos = m.wrapPos(pos + m.width)
 	m.field[newPos] += 0x1
+	m.changes = append(m.changes, newPos)
 
 	// Southwest
 	newPos = m.wrapPos(pos + m.width - 1)
 	m.field[newPos] += 0x1
+	m.changes = append(m.changes, newPos)
 }
 
 // subtractFromNeighbors subtracts from all neighboring cells.
 func (m *model) subtractFromNeighbors(pos int) {
+	m.changes = append(m.changes, pos)
+
 	// West
 	newPos := m.wrapPos(pos - 1)
 	m.field[newPos] -= 0x1
+	m.changes = append(m.changes, newPos)
 
 	// Northwest
 	newPos = m.wrapPos(pos - m.width - 1)
 	m.field[newPos] -= 0x1
+	m.changes = append(m.changes, newPos)
 
 	// North
 	newPos = m.wrapPos(pos - m.width)
 	m.field[newPos] -= 0x1
+	m.changes = append(m.changes, newPos)
 
 	// Northeast
 	newPos = m.wrapPos(pos - m.width + 1)
 	m.field[newPos] -= 0x1
+	m.changes = append(m.changes, newPos)
 
 	// East
 	newPos = m.wrapPos(pos + 1)
 	m.field[newPos] -= 0x1
+	m.changes = append(m.changes, newPos)
 
 	// Southeast
 	newPos = m.wrapPos(pos + m.width + 1)
 	m.field[newPos] -= 0x1
+	m.changes = append(m.changes, newPos)
 
 	// South
 	newPos = m.wrapPos(pos + m.width)
 	m.field[newPos] -= 0x1
+	m.changes = append(m.changes, newPos)
 
 	// Southwest
 	newPos = m.wrapPos(pos + m.width - 1)
 	m.field[newPos] -= 0x1
+	m.changes = append(m.changes, newPos)
 }
 
-// calculateNeighbors calculates alive neighbors for every cell in the model.
+// calculateNeighbors calculates alive neighbors for every cell in the model. It marks all added cells as changed, whether or not they will have, which makes the first generation a little expensive, but that's okay.
 func (m *model) calculateAllNeighbors() {
 	for i, c := range m.field {
 		if c.state() {
 			m.addToNeighbors(i)
+			m.changes = append(m.changes, i)
 		}
 	}
 }
 
-// makeAlive sets the cell state to alive and increments the neighbor count. It assumes the cell is dead.
+// makeAlive sets the cell state to alive and increments the neighbor count. It is idemptotent, assumes the cell is dead, and if it became alive on the current generation, appends the position to the list of changes.
 func (m *model) makeAlive(pos int) {
+	if m.field[pos].state() {
+		return
+	}
 	m.addToNeighbors(pos)
 	m.field[pos] = m.field[pos].vivify()
 }
 
-// makeDead sets the cell state to dead and decrements the neighbor count. It assumes the cell is alive.
+// makeDead sets the cell state to dead and decrements the neighbor count. It is idemptotent, assumes the cell is alive, and if it became dead on the current generation, appends the position to the list of changes.
 func (m *model) makeDead(pos int) {
+	if !m.field[pos].state() {
+		return
+	}
 	m.subtractFromNeighbors(pos)
 	m.field[pos] = m.field[pos].kill()
 }
 
 // nextGeneration evolves the field of automata one generation based on the rules of Conway's Game of Life.
 func (m *model) Next() {
-	// Deep copy the field
+	// Deep copy the field and changelist
 	next := make([]cell, m.width*m.height)
 	for i, _ := range m.field {
 		next[i] = m.field[i]
 	}
+	previousChanges := m.changes
+	m.changes = []int{}
 
 	// Loop over the field.
-	for i, c := range next {
+	for _, change := range previousChanges {
+		c := next[change]
 
-		// If a cell has zero alive neighbors and is already dead, it's just going to stay dead.
-		if c == 0 {
-			continue
-		}
 		if c.state() {
 			if c.neighbors() != 0x2 && c.neighbors() != 0x3 {
-				m.makeDead(i)
+				m.makeDead(change)
 			}
 		} else if c.neighbors() == 0x3 {
-			m.makeAlive(i)
+			m.makeAlive(change)
 		}
 	}
 }
@@ -228,9 +255,10 @@ func (m *model) String() string {
 
 func New(width, height int) *model {
 	m := &model{
-		width:  width,
-		height: height,
-		field:  make([]cell, width*height),
+		width:   width,
+		height:  height,
+		field:   make([]cell, width*height),
+		changes: []int{},
 	}
 	return m
 }

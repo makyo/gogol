@@ -19,12 +19,12 @@ type model struct {
 }
 
 // wrapPos wraps a cell position that would otherwise be outside of a rectangular grid.
-func (m model) wrapPos(x, y int) (int, int) {
+func (m *model) wrapPos(x, y int) (int, int) {
 	return int(math.Abs(float64(m.width+x))) % m.width, int(math.Abs(float64(m.height+y))) % m.height
 }
 
 // addToNeighbors adds amount to all neighboring cells neighbors amount.
-func (m model) addToNeighbors(amount, x, y int) {
+func (m *model) addToNeighbors(amount, x, y int) {
 	// West
 	newX, newY := m.wrapPos(x-1, y)
 	m.field[newY][newX].neighbors += amount
@@ -59,7 +59,7 @@ func (m model) addToNeighbors(amount, x, y int) {
 }
 
 // calculateNeighbors calculates alive neighbors for every cell in the model.
-func (m model) calculateAllNeighbors() {
+func (m *model) calculateAllNeighbors() {
 	for y, _ := range m.field {
 		for x, c := range m.field[y] {
 			if c.state == 1 {
@@ -70,19 +70,19 @@ func (m model) calculateAllNeighbors() {
 }
 
 // makeAlive sets the cell state to alive and increments the neighbor count. It assumes the cell is dead.
-func (m model) makeAlive(x, y int) {
+func (m *model) makeAlive(x, y int) {
 	m.addToNeighbors(1, x, y)
 	m.field[y][x].state = 1
 }
 
 // makeDead sets the cell state to dead and decrements the neighbor count. It assumes the cell is alive.
-func (m model) makeDead(x, y int) {
+func (m *model) makeDead(x, y int) {
 	m.addToNeighbors(-1, x, y)
 	m.field[y][x].state = 0
 }
 
 // nextGeneration evolves the field of automata one generation based on the rules of Conway's Game of Life.
-func (m model) Next() {
+func (m *model) Next() {
 	// Deep copy the field
 	next := make([][]cell, m.height)
 	for y, _ := range m.field {
@@ -115,7 +115,7 @@ func (m model) Next() {
 }
 
 // Populate generates a random field of automata, where each cell has a 1 in 5 chance of being alive.
-func (m model) Populate() {
+func (m *model) Populate() {
 	for y, _ := range m.field {
 		for x, _ := range m.field[y] {
 			if rand.Intn(5) == 0 {
@@ -127,7 +127,7 @@ func (m model) Populate() {
 }
 
 // Ingest sets the field to the given value.
-func (m model) Ingest(f *rle.RLEField) {
+func (m *model) Ingest(f *rle.RLEField) {
 	startX := (m.width - f.Width) / 2
 	startY := (m.height - f.Height) / 2
 	for y, row := range f.Field {
@@ -140,7 +140,7 @@ func (m model) Ingest(f *rle.RLEField) {
 	m.calculateAllNeighbors()
 }
 
-func (m model) ToggleCell(x, y int) {
+func (m *model) ToggleCell(x, y int) {
 	if m.field[y][x].state == 1 {
 		m.field[y][x].state = 0
 	} else {
@@ -149,7 +149,7 @@ func (m model) ToggleCell(x, y int) {
 }
 
 // View builds the entire screen's worth of cells to be printed by returning a • for a living cell or a space for a dead cell.
-func (m model) String() string {
+func (m *model) String() string {
 	var frame string
 
 	// Loop over rows...
@@ -171,8 +171,8 @@ func (m model) String() string {
 	return frame
 }
 
-func New(width, height int) model {
-	m := model{
+func New(width, height int) *model {
+	m := &model{
 		width:  width,
 		height: height,
 		field:  make([][]cell, height),

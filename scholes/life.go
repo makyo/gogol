@@ -95,7 +95,7 @@ func sumField(field []int, width int) []int {
 }
 
 // Next evolves the field one generation.
-func (m model) Next() {
+func (m *model) Next() {
 	sum := sumField(m.field, m.width)
 	threes := where(sum, 3)
 	fours := where(sum, 4)
@@ -104,7 +104,7 @@ func (m model) Next() {
 	}
 }
 
-func (m model) Ingest(f *rle.RLEField) {
+func (m *model) Ingest(f *rle.RLEField) {
 	startY := (m.width - f.Width) / 2
 	startX := (m.height - f.Height) / 2
 	for y, row := range f.Field {
@@ -117,7 +117,7 @@ func (m model) Ingest(f *rle.RLEField) {
 }
 
 // Populate generates a random field of automata, where each cell has a 1 in 5 chance of being alive.
-func (m model) Populate() {
+func (m *model) Populate() {
 	for i, _ := range m.field {
 		if rand.Intn(5) == 0 {
 			m.field[i] = 1
@@ -126,7 +126,7 @@ func (m model) Populate() {
 }
 
 // ToggleCell toggles whether the given cell is alive or dead.
-func (m model) ToggleCell(x, y int) {
+func (m *model) ToggleCell(x, y int) {
 	pos := y*m.width + x
 	if m.field[pos] == 1 {
 		m.field[pos] = 0
@@ -136,7 +136,7 @@ func (m model) ToggleCell(x, y int) {
 }
 
 // View builds the entire screen's worth of cells to be printed by returning a • for a living cell or a space for a dead cell.
-func (m model) String() string {
+func (m *model) String() string {
 	var frame string
 
 	// Loop over rows...
@@ -154,8 +154,8 @@ func (m model) String() string {
 	return frame
 }
 
-func New(width, height int) model {
-	return model{
+func New(width, height int) *model {
+	return &model{
 		width:  width,
 		height: height,
 		field:  make([]int, width*height),
