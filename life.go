@@ -14,6 +14,7 @@ import (
 	"github.com/makyo/gogol/naive1d"
 	"github.com/makyo/gogol/naive2d"
 	"github.com/makyo/gogol/prestafford1"
+	"github.com/makyo/gogol/prestafford2"
 	"github.com/makyo/gogol/scholes"
 )
 
@@ -24,7 +25,7 @@ type model struct {
 }
 
 var (
-	algoFlag = flag.String("algo", "naive1d", "Which algorithm to use (naive1d, naive2d, scholes, abrashstruct, abrash, abrash1d, abrashchangelist, prestafford1)")
+	algoFlag = flag.String("algo", "naive1d", "Which algorithm to use (naive1d, naive2d, scholes, abrashstruct, abrash, abrash1d, abrashchangelist, prestafford1, prestafford2)")
 	width    = 10
 	height   = 10
 )
@@ -48,6 +49,8 @@ func getModel(width, height int) model {
 		m.base = abrashchangelist.New(width, height)
 	case "prestafford1":
 		m.base = prestafford1.New(width, height)
+	case "prestafford2":
+		m.base = prestafford2.New(width, height)
 	}
 	return m
 }
